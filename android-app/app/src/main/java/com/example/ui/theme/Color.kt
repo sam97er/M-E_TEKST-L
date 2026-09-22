@@ -2,19 +2,32 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val TrendyolOrange = Color(0xFFF27A1A)
-val TrendyolOrangeDark = Color(0xFFD05005)
-val TrendyolOrangeLight = Color(0xFFFF9E43)
+// M&E Tekstil Aİ — Smart Pro brand palette
+val BrandGold = Color(0xFFC9A24A)
+val BrandGoldLight = Color(0xFFE5C66B)
+val BrandGoldDark = Color(0xFF8F6B22)
 
-val NavyDark = Color(0xFF0F172A)
-val NavySurface = Color(0xFF1E293B)
-val SlateBackground = Color(0xFFF8FAFC)
+val Midnight = Color(0xFF0B1220)
+val MidnightSurface = Color(0xFF121B2D)
+val MidnightElevated = Color(0xFF18243A)
 
-val SuccessGreen = Color(0xFF10B981)
-val WarningAmber = Color(0xFFF59E0B)
-val DangerRed = Color(0xFFEF4444)
-val InfoSky = Color(0xFF0284C7)
+val WarmBackground = Color(0xFFF7F4EC)
+val WarmSurface = Color(0xFFFFFDF8)
+val WarmSurfaceVariant = Color(0xFFEDE8DC)
 
-val DarkBackground = Color(0xFF090D16)
-val DarkSurface = Color(0xFF131B2E)
-val DarkSurfaceVariant = Color(0xFF1E293B)
+val SuccessGreen = Color(0xFF22B573)
+val WarningAmber = Color(0xFFE5A72B)
+val DangerRed = Color(0xFFE45757)
+val InfoSky = Color(0xFF3B82B5)
+
+val DarkBackground = Color(0xFF080D17)
+val DarkSurface = Color(0xFF111A2A)
+val DarkSurfaceVariant = Color(0xFF1A263B)
+
+// Compatibility aliases for existing screens.
+val TrendyolOrange = BrandGold
+val TrendyolOrangeDark = BrandGoldDark
+val TrendyolOrangeLight = BrandGoldLight
+val NavyDark = Midnight
+val NavySurface = MidnightSurface
+val SlateBackground = WarmBackground

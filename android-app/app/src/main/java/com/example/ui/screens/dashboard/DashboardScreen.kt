@@ -1,6 +1,5 @@
 package com.example.ui.screens.dashboard
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,19 +15,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudSync
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -50,25 +49,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.repository.MAndETekstilRepository
-import com.example.ui.components.MetricStatCard
-import com.example.ui.components.SectionTitle
-import com.example.ui.components.StatusColorType
-import com.example.ui.components.StatusPill
-import com.example.ui.components.TrendyolAppTopBar
+import com.example.ui.theme.BrandGold
+import com.example.ui.theme.BrandGoldLight
 import com.example.ui.theme.DangerRed
 import com.example.ui.theme.InfoSky
-import com.example.ui.theme.NavyDark
+import com.example.ui.theme.Midnight
 import com.example.ui.theme.SuccessGreen
-import com.example.ui.theme.TrendyolOrange
-import com.example.ui.theme.WarningAmber
+import com.example.ui.theme.WarmBackground
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -91,341 +84,296 @@ fun DashboardScreen(
     val questions by repository.pendingQuestions.collectAsState(initial = emptyList())
     val returns by repository.returns.collectAsState(initial = emptyList())
     val pendingAiTasksCount by repository.pendingAiTasksCount.collectAsState(initial = 0)
-    val totalSalesDouble by repository.totalSales.collectAsState(initial = 0.0)
-
+    val totalSales by repository.totalSales.collectAsState(initial = 0.0)
     val scope = rememberCoroutineScope()
     var isSyncing by remember { mutableStateOf(false) }
 
-    val safeSales = totalSalesDouble ?: 1579.60
-    val estimatedProfit = safeSales * 0.28 // Approx ~28% average margin
+    val sales = totalSales ?: orders.sumOf { it.totalPrice }
+    val profit = orders.sumOf { it.netProfit }
+    val activeOrders = orders.count { it.status.name != "DELIVERED" && it.status.name != "CANCELLED" }
+    val criticalStock = lowStockProducts.count { it.stockQuantity <= 2 }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TrendyolAppTopBar(
-            title = "M&E Tekstil Trendyol",
-            subtitle = "Canlı Satıcı Gösterge Paneli",
-            onRefreshClick = {
-                scope.launch {
-                    isSyncing = true
-                    val result = repository.syncTrendyol()
-                    isSyncing = false
-                    snackbarHostState.showSnackbar(result.getOrDefault("Senkronizasyon tamamlandı."))
-                }
-            }
-        )
-
-        LazyColumn(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(WarmBackground)
+    ) {
+        // New brand header — deliberately different from the old orange dashboard.
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 16.dp, bottom = 90.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .fillMaxWidth()
+                .background(Midnight)
+                .padding(horizontal = 18.dp, vertical = 18.dp)
         ) {
-            // Live Status Banner
-            item {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            "M&E TEKSTİL",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.2.sp
+                        )
+                        Text(
+                            "Aİ Smart Pro • İşletme Kontrol Merkezi",
+                            color = BrandGoldLight,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(
+                            Icons.Default.NotificationsNone,
+                            contentDescription = "Bildirimler",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = .08f))
+                                .padding(9.dp)
+                        )
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Ayarlar",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = .08f))
+                                .clickable(onClick = onNavigateToSettings)
+                                .padding(9.dp)
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(18.dp))
+
                 Card(
-                    modifier = Modifier.fillMaxWidth().testTag("sync_status_card"),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = NavyDark)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("sync_status_card")
+                        .clickable(onClick = onNavigateToSyncCenter),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .08f))
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.padding(14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                             Box(
-                                modifier = Modifier
+                                Modifier
                                     .size(42.dp)
                                     .clip(CircleShape)
-                                    .background(SuccessGreen.copy(alpha = 0.2f)),
+                                    .background(SuccessGreen.copy(alpha = .18f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.CloudSync,
-                                    contentDescription = "Sync",
-                                    tint = SuccessGreen,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                Icon(Icons.Default.CloudSync, null, tint = SuccessGreen)
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.clickable { onNavigateToSyncCenter() }) {
-                                Text(
-                                    text = "Trendyol API: Canlı & Aktif ➔",
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
-                                Text(
-                                    text = "3 Bağımsız AI Slotu Hazır • Senkron Merkezi",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = Color.White.copy(alpha = 0.7f),
-                                        fontSize = 11.sp
-                                    )
-                                )
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text("Trendyol bağlantısı", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("Canlı senkronizasyon merkezi hazır", color = Color.White.copy(alpha = .65f), fontSize = 11.sp)
                             }
                         }
                         Button(
                             onClick = {
                                 scope.launch {
                                     isSyncing = true
-                                    val res = repository.syncTrendyol()
+                                    val result = repository.syncTrendyol()
                                     isSyncing = false
-                                    snackbarHostState.showSnackbar(res.getOrDefault("Senkronizasyon güncellendi."))
+                                    snackbarHostState.showSnackbar(
+                                        result.getOrDefault("Senkronizasyon tamamlandı.")
+                                    )
                                 }
                             },
                             enabled = !isSyncing,
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = TrendyolOrange),
-                            modifier = Modifier.testTag("sync_now_button")
+                            modifier = Modifier.testTag("sync_now_button"),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BrandGold,
+                                contentColor = Midnight
+                            )
                         ) {
                             if (isSyncing) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(16.dp),
-                                    color = Color.White,
+                                    color = Midnight,
                                     strokeWidth = 2.dp
                                 )
                             } else {
-                                Text("Senkronize Et", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Icon(Icons.Default.Sync, null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(5.dp))
+                                Text("Şimdi", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                             }
                         }
-                    }
-                }
-            }
-
-            // Quick metrics grid (2 rows of 2 cards)
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    MetricStatCard(
-                        title = "Günlük Satış",
-                        value = "${String.format(Locale.US, "%.2f", safeSales)} ₺",
-                        subtitle = "Toplam onaylı ciro",
-                        icon = Icons.Default.TrendingUp,
-                        accentColor = TrendyolOrange,
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToProfit
-                    )
-                    MetricStatCard(
-                        title = "Tahmini Kâr",
-                        value = "${String.format(Locale.US, "%.2f", estimatedProfit)} ₺",
-                        subtitle = "Net tahmini kâr",
-                        icon = Icons.Default.AttachMoney,
-                        accentColor = SuccessGreen,
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToProfit
-                    )
-                }
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    MetricStatCard(
-                        title = "Açık Siparişler",
-                        value = "${orders.size} Adet",
-                        subtitle = "Hazırlık merkezinde",
-                        icon = Icons.Default.ShoppingBag,
-                        accentColor = InfoSky,
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToOrders
-                    )
-                    MetricStatCard(
-                        title = "Yeni Sorular",
-                        value = "${questions.size} Soru",
-                        subtitle = "AI yanıtı bekleyen",
-                        icon = Icons.Default.QuestionAnswer,
-                        accentColor = WarningAmber,
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToQuestions
-                    )
-                }
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    MetricStatCard(
-                        title = "Düşük Stok",
-                        value = "${lowStockProducts.size} Varyant",
-                        subtitle = "Kritik < 5 adet",
-                        icon = Icons.Default.Warning,
-                        accentColor = DangerRed,
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToStock
-                    )
-                    MetricStatCard(
-                        title = "İadeler",
-                        value = "${returns.size} Adet",
-                        subtitle = "İnceleme sürecinde",
-                        icon = Icons.Default.Inventory2,
-                        accentColor = NavyDark,
-                        modifier = Modifier.weight(1f),
-                        onClick = onNavigateToOrders
-                    )
-                }
-            }
-
-            // AI Pending Suggestions Banner
-            if (pendingAiTasksCount > 0) {
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth().testTag("pending_ai_banner"),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = TrendyolOrange.copy(alpha = 0.12f)),
-                        onClick = onNavigateToApprovals
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Default.AutoAwesome,
-                                    contentDescription = "AI",
-                                    tint = TrendyolOrange,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text(
-                                        text = "$pendingAiTasksCount AI Önerisi Onay Bekliyor",
-                                        style = MaterialTheme.typography.titleSmall.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = TrendyolOrange
-                                        )
-                                    )
-                                    Text(
-                                        text = "Müşteri yanıtları ve fiyat önerilerini inceleyin",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 11.sp
-                                        )
-                                    )
-                                }
-                            }
-                            StatusPill(text = "İncele", colorType = StatusColorType.INFO)
-                        }
-                    }
-                }
-            }
-
-            // Sales Trend Graphic Chart
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = "Satış & Sipariş Hacmi Trendi",
-                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
-                                )
-                                Text(
-                                    text = "Son 7 günlük sipariş hareketi",
-                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                )
-                            }
-                            StatusPill(text = "+%18.4 Büyüme", colorType = StatusColorType.SUCCESS)
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Custom interactive Canvas Chart
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(140.dp)
-                        ) {
-                            Canvas(modifier = Modifier.fillMaxSize()) {
-                                val barWidth = size.width / 15f
-                                val spacing = size.width / 8f
-                                val heights = listOf(0.45f, 0.6f, 0.35f, 0.8f, 0.65f, 0.95f, 0.75f)
-                                val days = listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz")
-
-                                heights.forEachIndexed { index, ratio ->
-                                    val left = spacing * index + 16.dp.toPx()
-                                    val top = size.height - (size.height * ratio * 0.8f) - 20.dp.toPx()
-                                    val barHeight = size.height * ratio * 0.8f
-
-                                    // Bar background
-                                    drawRoundRect(
-                                        color = if (index == 5) TrendyolOrange else TrendyolOrange.copy(alpha = 0.3f),
-                                        topLeft = Offset(left, top),
-                                        size = Size(barWidth, barHeight),
-                                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx(), 6.dp.toPx())
-                                    )
-                                }
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            listOf("Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz").forEach { day ->
-                                Text(
-                                    text = day,
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 11.sp
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Quick Operations Buttons
-            item {
-                SectionTitle(title = "Hızlı İşlemler")
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Button(
-                        onClick = onNavigateToQuestions,
-                        modifier = Modifier.weight(1f).testTag("quick_reply_button"),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = TrendyolOrange)
-                    ) {
-                        Text("AI Yanıtla", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    }
-                    OutlinedButton(
-                        onClick = onNavigateToDailyBrief,
-                        modifier = Modifier.weight(1f).testTag("quick_daily_brief_button"),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Günlük Rapor", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                    }
-                    OutlinedButton(
-                        onClick = onNavigateToStock,
-                        modifier = Modifier.weight(1f).testTag("quick_stock_button"),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Stok Sayımı", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
         }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 92.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item {
+                Text("Bugünün kontrolü", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Midnight)
+                Text("Önemli rakamlar ve bekleyen işler tek ekranda.", color = Color(0xFF6B7280), fontSize = 13.sp)
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    ExecutiveMetric("Ciro", "${String.format(Locale.US, "%.0f", sales)} ₺", "Kayıtlı satış", Icons.Default.TrendingUp, BrandGold, Modifier.weight(1f), onNavigateToProfit)
+                    ExecutiveMetric("Net Kâr", "${String.format(Locale.US, "%.0f", profit)} ₺", "Hesaplanan", Icons.Default.AutoAwesome, SuccessGreen, Modifier.weight(1f), onNavigateToProfit)
+                }
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    ExecutiveMetric("Sipariş", "$activeOrders", "Aktif işlem", Icons.Default.ShoppingBag, InfoSky, Modifier.weight(1f), onNavigateToOrders)
+                    ExecutiveMetric("Kritik Stok", "$criticalStock", "≤ 2 adet", Icons.Default.WarningAmber, DangerRed, Modifier.weight(1f), onNavigateToStock)
+                }
+            }
+
+            item {
+                Text("Aksiyon merkezi", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Midnight)
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    ActionCard("Siparişler", "$activeOrders aktif", Icons.Default.ShoppingBag, InfoSky, onNavigateToOrders, Modifier.weight(1f))
+                    ActionCard("Stok", "${products.size} varyant", Icons.Default.Inventory2, BrandGoldDarkCompat(), onNavigateToStock, Modifier.weight(1f))
+                }
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                    ActionCard("Sorular AI", "${questions.size} bekliyor", Icons.Default.QuestionAnswer, SuccessGreen, onNavigateToQuestions, Modifier.weight(1f))
+                    ActionCard("İadeler", "${returns.size} kayıt", Icons.Default.Inventory2, DangerRed, onNavigateToOrders, Modifier.weight(1f))
+                }
+            }
+
+            if (pendingAiTasksCount > 0) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().testTag("pending_ai_banner").clickable(onClick = onNavigateToApprovals),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF2E5BF))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                Modifier.size(44.dp).clip(CircleShape).background(BrandGold.copy(alpha = .16f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.AutoAwesome, null, tint = BrandGold)
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text("$pendingAiTasksCount AI görevi onay bekliyor", fontWeight = FontWeight.Bold, color = Midnight)
+                                Text("Yanıt, fiyat ve içerik önerilerini tek merkezden incele.", fontSize = 12.sp, color = Color(0xFF6B5A2B))
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                Text("Hızlı işlemler", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Midnight)
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    OutlinedButton(
+                        onClick = onNavigateToQuestions,
+                        modifier = Modifier.weight(1f).testTag("quick_reply_button"),
+                        shape = RoundedCornerShape(13.dp)
+                    ) { Text("AI Yanıt") }
+                    OutlinedButton(
+                        onClick = onNavigateToDailyBrief,
+                        modifier = Modifier.weight(1f).testTag("quick_daily_brief_button"),
+                        shape = RoundedCornerShape(13.dp)
+                    ) { Text("Günlük Rapor") }
+                    OutlinedButton(
+                        onClick = onNavigateToStock,
+                        modifier = Modifier.weight(1f).testTag("quick_stock_button"),
+                        shape = RoundedCornerShape(13.dp)
+                    ) { Text("Stok") }
+                }
+            }
+
+            item {
+                Text(
+                    "M&E Tekstil Aİ",
+                    fontSize = 12.sp,
+                    color = Color(0xFF8A8F98),
+                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                )
+            }
+        }
     }
 }
+
+@Composable
+private fun ExecutiveMetric(
+    title: String,
+    value: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    accent: Color,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.size(34.dp).clip(CircleShape).background(accent.copy(alpha = .12f)),
+                    contentAlignment = Alignment.Center
+                ) { Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp)) }
+                Spacer(Modifier.width(8.dp))
+                Text(title, fontSize = 12.sp, color = Color(0xFF687386), fontWeight = FontWeight.SemiBold)
+            }
+            Spacer(Modifier.height(10.dp))
+            Text(value, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Midnight)
+            Text(subtitle, fontSize = 11.sp, color = Color(0xFF8A8F98))
+        }
+    }
+}
+
+@Composable
+private fun ActionCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    accent: Color,
+    onClick: () -> Unit,
+    modifier: Modifier
+) {
+    Card(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Icon(icon, null, tint = accent, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.height(12.dp))
+            Text(title, fontWeight = FontWeight.Bold, color = Midnight)
+            Text(subtitle, fontSize = 11.sp, color = Color(0xFF7B8494))
+        }
+    }
+}
+
+private fun BrandGoldDarkCompat(): Color = Color(0xFF8F6B22)
