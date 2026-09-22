@@ -67,8 +67,8 @@ class SecureConfigManager(context: Context) {
         val rawApiKey = prefs.getString("ty_api_key", "") ?: ""
         
         // Strip out old dummy credentials if present
-        val sellerId = if (rawSellerId == "1304973") "" else rawSellerId
-        val apiKey = if (rawApiKey == "iRpZjEtgR8Fxg2odLsIP") "" else rawApiKey
+        val sellerId = rawSellerId
+        val apiKey = rawApiKey
 
         return TrendyolApiConfiguration(
             sellerId = sellerId,
