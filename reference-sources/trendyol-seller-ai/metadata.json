@@ -1,0 +1,6 @@
+{
+  "name": "سامر عيد",
+  "description": "تطبيق إدارة متجر ترنديول والمزامنة السحابية الذكية مع الذكاء الاصطناعي",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

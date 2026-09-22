@@ -1,0 +1,3 @@
+Urun_ID,Urun_Kodu,Urun_Adi,Kategori,Marka,Barkod,SKU,Renk,Beden,Maliyet_TL,Satis_Fiyati_TL,KDV_Orani,Durum
+2,TSHIRT-001,Premium Pamuklu Polo Tişört,Giyim,M&E Tekstil,8680001112223,,Lacivert,L,120.00,350.00,10.0,ACTIVE
+2,TSHIRT-001,Premium Pamuklu Polo Tişört,Giyim,M&E Tekstil,8680001112224,,Beyaz,M,110.00,320.00,10.0,ACTIVE

@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Shopping bag / textile fabric outline in pure white with soft drop shadow appearance -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,38h40c2.2,0 4,1.8 4,4l-4,32c-0.2,1.8 -1.7,3.2 -3.5,3.2H37.5c-1.8,0 -3.3,-1.4 -3.5,-3.2L30,42C30,39.8 31.8,38 34,38z" />
+    <!-- Bag handles -->
+    <path
+        android:pathData="M44,40v-8c0,-5.5 4.5,-10 10,-10s10,4.5 10,10v8"
+        android:strokeWidth="4"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <!-- Trendyol styled inner dynamic M & E lettermark / textile weave & AI spark -->
+    <path
+        android:fillColor="#F27A1A"
+        android:pathData="M40,50h5l4,10l4,-10h4l4,10l4,-10h5v18h-4v-11l-4,8h-3l-4,-8v11h-4v-11l-4,8h-3l-4,-8v11h-4V50z" />
+    <!-- AI star / spark accent top right of bag -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M73,30l1.5,4.5l4.5,1.5l-4.5,1.5l-1.5,4.5l-1.5,-4.5l-4.5,-1.5l4.5,-1.5z" />
+</vector>

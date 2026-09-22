@@ -1,0 +1,7 @@
+{
+  "name": "Smart ERP",
+  "description": "نظام تخطيط موارد المؤسسات الشامل لإدارة المخازن والمبيعات، مزامنة متجر ترنديول، الجرد بالباركود، والفواتير والتقارير",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

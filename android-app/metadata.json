@@ -1,0 +1,6 @@
+{
+  "name": "M&E Tekstil Trendyol",
+  "description": "M&E Tekstil Trendyol Satıcı Yönetimi, Akıllı Sipariş & Stok, 3 Bağımsız Yapay Zeka Sağlayıcısı ve Telegram Entegrasyonu",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

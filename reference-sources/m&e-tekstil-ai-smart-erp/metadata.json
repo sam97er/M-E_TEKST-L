@@ -1,0 +1,7 @@
+{
+  "name": "M&E Tekstil AI Smart ERP",
+  "description": "AI Smart ERP and Mastermind system for M&E Tekstil on Trendyol, managing inventory, customer support in Turkish, pricing, and executive reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

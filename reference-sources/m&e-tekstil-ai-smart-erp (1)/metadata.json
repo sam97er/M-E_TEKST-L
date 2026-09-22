@@ -1,0 +1,6 @@
+{
+  "name": "M&E Tekstil AI Smart ERP",
+  "description": "M&E Tekstil için Trendyol entegrasyonlu, 3 AI modelleri destekli, manuel onaylı akıllı ERP ve stok yönetim sistemi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

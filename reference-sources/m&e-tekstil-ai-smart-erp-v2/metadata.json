@@ -1,0 +1,6 @@
+{
+  "name": "M&E Tekstil AI Smart ERP V2",
+  "description": "Tekstil ve e-ticaret için profesyonel akıllı ERP, stok, Trendyol entegrasyonu ve AI asistan sistemi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
